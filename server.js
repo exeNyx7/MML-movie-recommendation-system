@@ -23,14 +23,14 @@ mongoose.connect(process.env.MONGO_URI, {
 // Routes
 const userRoutes = require('./routes/userRoutes');
 const movieRoutes = require('./routes/movieRoutes');
-// const reviewRoutes = require('./routes/reviewRoutes');
-// const listRoutes = require('./routes/listRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
+const listRoutes = require('./routes/listRoutes');
 // const communityRoutes = require('./routes/communityRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
-// app.use('/api/reviews', reviewRoutes);
-// app.use('/api/lists', listRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/lists', listRoutes);
 // app.use('/api/community', communityRoutes);
 
 // Basic route for home

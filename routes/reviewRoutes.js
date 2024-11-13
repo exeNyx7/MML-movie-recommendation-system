@@ -1,10 +1,19 @@
-// const express = require('express');
-// const router = express.Router();
-// const { addReview, updateReview, deleteReview, listReviews } = require('../controllers/reviewController');
+const express = require('express');
+const router = express.Router();
+const { addReview, updateReview, getMovieReviews, getReviewHighlights, rateMovie, rateAndReviewMovie } = require('../controllers/reviewController');
+// const authenticate = require('../middlewares/authMiddleware');
 
-// router.post('/', addReview);
-// router.put('/:id', updateReview);
-// router.delete('/:id', deleteReview);
-// router.get('/', listReviews);
+// Existing routes
+router.post('/', addReview);
+router.put('/:reviewId', updateReview);
+router.get('/movie/:movieId', getMovieReviews);
+router.get('/highlights', getReviewHighlights);
 
-// module.exports = router;
+// <IMPORTANT> might add it when fixed my rateMovie method.
+// New routes for rating a movie
+// router.post('/rate', rateMovie);
+
+// New route for rating and reviewing a movie
+router.post('/rate-review', rateAndReviewMovie);
+
+module.exports = router;
