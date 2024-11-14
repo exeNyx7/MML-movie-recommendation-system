@@ -3,6 +3,8 @@ const Wishlist = require('../models/Wishlist');
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const { generateToken } = require('../config/auth');
+
 
 const registerUser = async (req, res) => {
     try {
@@ -54,22 +56,23 @@ const loginUser = async (req, res) => {
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Create token
-            const token = jwt.sign(
-            { 
-                user_id: user._id, 
-                email, 
-                role: user.role 
-            },
-                process.env.JWT_SECRET,
-            { 
-                expiresIn: "2h" 
-            });
-
+            const token = generateToken(user);
+            
+            // const token = jwt.sign(
+                // { 
+                    //     user_id: user._id, 
+                    //     email, 
+                    //     role: user.role 
+                    // },
+                    //     process.env.JWT_SECRET,
+                    // { 
+                        //     expiresIn: "2h" 
+                        // });
+                        
+                        
             // save user token
             user.token = token;
-
-            // user
-            res.status(200).json(user);
+            res.status(200).json({ message: "Logged in successfully", email, token });
         } else {
             res.status(400).send("Invalid Credentials");
         }
@@ -131,22 +134,13 @@ const loginAdmin = async (req, res) => {
 
         if (user && (await bcrypt.compare(password, user.password))) {
             // Create token
-            const token = jwt.sign(
-            { 
-                user_id: user._id, 
-                email, 
-                role: user.role 
-            },
-                process.env.JWT_SECRET,
-            { 
-                expiresIn: "2h" 
-            });
+            const token = generateToken(user);
 
             // save user token
             user.token = token;
 
             // admin
-            res.status(200).json(user);
+            res.status(200).json({ message: "Logged in successfully", email, token });
         } else {
             res.status(400).send("Invalid Credentials");
         }
@@ -197,8 +191,6 @@ const updateUser = async (req, res) => {
         res.status(500).send("Something went wrong");
     }
 };
-
-//
 
 // Delete user
 const deleteUser = async (req, res) => {
@@ -292,6 +284,8 @@ const updateUserPreferences = async (req, res) => {
 // };
 
 //
+
+// Update a user's wishlist
 const updateWishlist = async (req, res) => {
     const { movies } = req.body;
     const userId = req.user.user_id;

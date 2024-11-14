@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { addReview, updateReview, getMovieReviews, getReviewHighlights, rateMovie, rateAndReviewMovie } = require('../controllers/reviewController');
-// const authenticate = require('../middlewares/authMiddleware');
+const authenticate = require('../middlewares/authMiddleware');
+const adminRoleCheck = require('../middlewares/roleCheck');
 
 // Existing routes
 router.post('/', addReview);

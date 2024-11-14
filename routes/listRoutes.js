@@ -10,6 +10,8 @@ const {
     getListsByUser,
     getAllLists
 } = require('../controllers/listController');
+const authenticate = require('../middlewares/authMiddleware');
+const adminRoleCheck = require('../middlewares/roleCheck');
 
 // Create a new custom list
 router.post('/', createList);

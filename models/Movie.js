@@ -40,6 +40,8 @@ averageRating: {
     popularity: { type: Number, default: 0 }, // Can be incremented based on user interactions
     viewCount: { type: Number, default: 0 }, // Tracks how often the movie is viewed
 
+    reminders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // for module # 7
+
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 movieSchema.index({ title: 'text', director: 'text', cast: 'text', genre: 1, averageRating: 1, popularity: 1, releaseDate: 1, countryOfOrigin: 1, language: 1, keywords: 1 });
