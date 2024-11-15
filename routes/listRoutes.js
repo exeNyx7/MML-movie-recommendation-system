@@ -13,29 +13,21 @@ const {
 const authenticate = require('../middlewares/authMiddleware');
 const adminRoleCheck = require('../middlewares/roleCheck');
 
-// Create a new custom list
-router.post('/', createList);
 
-// Update an existing custom list
-router.put('/:listId', updateList);
+router.post('/', createList); // Create a new custom list
 
-// Delete a custom list
-router.delete('/:listId', deleteList);
+// TRY TO ADD ADMIN TO IT: (authenticate that only admin or creator can update or delete a list)
+router.put('/:listId', updateList); // Update an existing custom list
+router.delete('/:listId', deleteList); // Delete a custom list
 
-// Get details of a specific custom list
-router.get('/:listId', getList);
+router.get('/:listId', getList); // Get details of a specific custom list
 
-// Follow a custom list
-router.post('/follow/:listId', followList);
+router.post('/follow/:listId', followList); // Follow a custom list
+router.post('/unfollow/:listId', unfollowList); // Unfollow a custom list
 
-// Unfollow a custom list
-router.post('/unfollow/:listId', unfollowList);
 
-// Get all lists created by a specific user
-router.get('/user/:userId', getListsByUser);
-
-// Get all custom lists
-router.get('/', getAllLists); // Route to get all lists
+router.get('/user/:userId', getListsByUser); // Get all lists created by a specific user
+router.get('/', getAllLists); // Get all custom lists
 
 
 module.exports = router;

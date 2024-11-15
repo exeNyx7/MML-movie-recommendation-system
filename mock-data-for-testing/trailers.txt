@@ -1,0 +1,47 @@
+[
+    {
+        "movie": "636d1a4f5f1a2b52e3f2a1f1",  // Replace with actual ObjectId for "Quantum Rift"
+        "trailerNumber": 1,
+        "title": "Quantum Rift - Teaser Trailer",
+        "description": "The first look at Quantum Rift, a sci-fi action thriller exploring alternate dimensions.",
+        "releaseDate": "2025-02-01T00:00:00Z",
+        "url": "https://example.com/trailers/quantum-rift-teaser.mp4",
+        "aired": false
+    },
+    {
+        "movie": "636d1a4f5f1a2b52e3f2a1f2",  // Replace with actual ObjectId for "Starlight Beacon"
+        "trailerNumber": 1,
+        "title": "Starlight Beacon - Official Trailer",
+        "description": "Join the journey to unlock the mysteries of the stars in this magical adventure.",
+        "releaseDate": "2025-06-01T00:00:00Z",
+        "url": "https://example.com/trailers/starlight-beacon-official.mp4",
+        "aired": false
+    },
+    {
+        "movie": "636d1a4f5f1a2b52e3f2a1f3",  // Replace with actual ObjectId for "Galactic Echo"
+        "trailerNumber": 1,
+        "title": "Galactic Echo - First Look",
+        "description": "Explore deep space as a team of astronauts unearths the secrets of a mysterious signal.",
+        "releaseDate": "2025-05-01T00:00:00Z",
+        "url": "https://example.com/trailers/galactic-echo-first-look.mp4",
+        "aired": false
+    },
+    {
+        "movie": "636d1a4f5f1a2b52e3f2a1f4",  // Replace with actual ObjectId for "The Aether Code"
+        "trailerNumber": 1,
+        "title": "The Aether Code - Teaser",
+        "description": "An exclusive teaser exploring the hidden power of an ancient code.",
+        "releaseDate": "2025-08-10T00:00:00Z",
+        "url": "https://example.com/trailers/aether-code-teaser.mp4",
+        "aired": false
+    },
+    {
+        "movie": "636d1a4f5f1a2b52e3f2a1f5",  // Replace with actual ObjectId for "Eclipse Protocol"
+        "trailerNumber": 1,
+        "title": "Eclipse Protocol - Trailer",
+        "description": "Get a sneak peek into the thrilling mystery as time unravels during a solar eclipse.",
+        "releaseDate": "2025-10-15T00:00:00Z",
+        "url": "https://example.com/trailers/eclipse-protocol-trailer.mp4",
+        "aired": false
+    }
+]

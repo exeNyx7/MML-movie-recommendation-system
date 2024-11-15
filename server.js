@@ -1,9 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 require('dotenv').config();
-const { scheduleMovieReleaseNotifications } = require('./controllers/notificationController');
 const connectDB = require('./config/db');
-
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -15,29 +13,21 @@ app.use(express.urlencoded({ extended: true })); // for parsing application/x-ww
 // MongoDB Connection
 connectDB();
 
-
-// mongoose.connect(process.env.MONGO_URI, {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-// })
-// .then(() => console.log('MongoDB connected successfully'))
-// .catch(err => {
-//     console.error('Failed to connect to MongoDB:', err);
-//     process.exit(1); // Exit the process with failure
-// });
-// Start the notification scheduler
-scheduleMovieReleaseNotifications();
 // Routes
 const userRoutes = require('./routes/userRoutes');
 const movieRoutes = require('./routes/movieRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const listRoutes = require('./routes/listRoutes');
+const reminderRoutes = require('./routes/reminderRoutes'); 
+const trailerRoutes = require('./routes/trailerRoutes');
 // const communityRoutes = require('./routes/communityRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/lists', listRoutes);
+app.use('/api/reminders', reminderRoutes); 
+app.use('/api/trailers', trailerRoutes);
 // app.use('/api/community', communityRoutes);
 
 // Basic route for home

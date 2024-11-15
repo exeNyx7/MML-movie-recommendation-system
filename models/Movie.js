@@ -40,7 +40,7 @@ averageRating: {
     popularity: { type: Number, default: 0 }, // Can be incremented based on user interactions
     viewCount: { type: Number, default: 0 }, // Tracks how often the movie is viewed
 
-    reminders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }], // for module # 7
+    aired: { type: Boolean, default: false, required: true },
 
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });

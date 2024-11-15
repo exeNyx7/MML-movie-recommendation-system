@@ -3,7 +3,9 @@ const Wishlist = require('../models/Wishlist');
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { generateToken } = require('../config/auth');
+const { 
+    generateToken 
+} = require('../config/auth');
 
 
 const registerUser = async (req, res) => {

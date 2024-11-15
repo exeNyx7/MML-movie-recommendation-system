@@ -10,35 +10,23 @@ const {
     searchAndFilterMovies,
     getTopMoviesOfMonth,
     getTopMoviesByGenre,
-    getUpcomingMovies, 
-    setReminder,
-    getMoviesWithReminders,
-    getAllMoviesWithReminders,
-    getRemindersByUserId,
-    getUsersByMovieName,
-    getUsersByMovieId
+    getUpcomingMovies
 } = require('../controllers/movieController');
 const authenticate = require('../middlewares/authMiddleware');
 const adminRoleCheck = require('../middlewares/roleCheck');
 
-router.post('/', addMovie);
-router.put('/:id', updateMovie);
-router.delete('/:id', deleteMovie);
+// ADD ADMIN ROLE FOR THE BASIC CRUD AND SOME EXTRA FUNCTIONS
+router.post('/', authenticate, adminRoleCheck, addMovie);
+router.put('/:id', authenticate, adminRoleCheck, updateMovie);
+router.delete('/:id', authenticate, adminRoleCheck, deleteMovie);
 router.get('/', getAllMovies);
 router.get('/search', searchMovieByName); // Route to handle searching by name
-// route for search and filter
-router.get('/filter', searchAndFilterMovies);
+
+router.get('/filter', searchAndFilterMovies); // route for search and filter
 
 router.get('/top/month', getTopMoviesOfMonth);
 router.get('/top/genre', getTopMoviesByGenre); 
 router.get('/upcoming', getUpcomingMovies);
-
-router.post('/set-reminder/:movieId', authenticate, setReminder);
-router.get('/reminders', authenticate, getMoviesWithReminders);
-router.get('/reminders/all', authenticate, getAllMoviesWithReminders);
-router.get('/reminders/user/:userId', authenticate, getRemindersByUserId);
-router.get('/reminders/movie/name/:movieName', authenticate, getUsersByMovieName);
-router.get('/reminders/movie/id/:movieId', authenticate, getUsersByMovieId);
 
 router.get('/:id', getMovie);
 

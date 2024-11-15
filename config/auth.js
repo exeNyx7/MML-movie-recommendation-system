@@ -1,4 +1,3 @@
-// /config/auth.js
 const jwt = require('jsonwebtoken');
 
 const generateToken = (user) => {
@@ -17,4 +16,7 @@ const verifyToken = (token) => {
     }
 };
 
-module.exports = { generateToken, verifyToken };
+module.exports = { 
+    generateToken, 
+    verifyToken 
+};
