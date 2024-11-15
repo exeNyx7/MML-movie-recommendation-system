@@ -3,6 +3,7 @@ const Movie = require('../models/Movie');
 const Trailer = require('../models/Trailer');
 const Reminder = require('../models/Reminder');
 const User = require('../models/User');
+require('dotenv').config();
 
 // Send a notification email to the user for upcoming movies or trailers for which they have set reminders
 exports.sendReminderEmails = async (req, res) => {
@@ -64,7 +65,6 @@ exports.sendReminderEmails = async (req, res) => {
         res.status(500).json({ message: "Failed to send reminder emails: " + error.message });
     }
 };
-
 
 // Set Reminder for a Movie
 exports.setMovieReminder = async (req, res) => {

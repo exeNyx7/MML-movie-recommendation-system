@@ -2,6 +2,7 @@ const Movie = require('../models/Movie');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+require('dotenv').config();
 
 
 
