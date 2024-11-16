@@ -5,31 +5,83 @@ const Reminder = require('../models/Reminder');
 const User = require('../models/User');
 require('dotenv').config();
 
-// Send a notification email to the user for upcoming movies or trailers for which they have set reminders
-exports.sendReminderEmails = async (req, res) => {
-    const { page = 1, limit = 10 } = req.query; // Handle pagination
+// Helper function to send email
+const sendEmail = async (userEmail, subject, text) => {
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: process.env.EMAIL_USERNAME,
+            pass: process.env.EMAIL_PASSWORD
+        }
+    });
+
+    const mailOptions = {
+        from: process.env.EMAIL_USERNAME,
+        to: userEmail,
+        subject: subject,
+        text: text
+    };
+
+    await transporter.sendMail(mailOptions);
+};
+
+// Send reminder emails to a specific user
+exports.sendReminderEmailsToUser = async (req, res) => {
+    const userId = req.params.userId;
 
     try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USERNAME,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        });
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ message: "User not found" });
+        }
 
-        // Fetch reminders for movies or trailers releasing soon
         const today = new Date();
-        const tomorrow = new Date(today);
-        tomorrow.setDate(tomorrow.getDate() + 1); // Adjust based on how far in advance you want to send reminders
+        const nextMonth = new Date(today);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+        const reminders = await Reminder.find({
+            user: userId,
+            $or: [
+                { movie: { $exists: true }, 'movie.releaseDate': { $gte: today, $lte: nextMonth } },
+                { trailer: { $exists: true }, 'trailer.releaseDate': { $gte: today, $lte: nextMonth } }
+            ]
+        })
+        .populate('movie', 'title releaseDate')
+        .populate('trailer', 'title releaseDate');
+
+        for (const reminder of reminders) {
+            const content = reminder.movie || reminder.trailer;
+            const subject = `Reminder: Upcoming Release - ${content.title}`;
+            const text = `Hi ${user.username},\n\nDon't forget to check out "${content.title}" releasing on ${content.releaseDate.toDateString()}.\n\nBest regards,\nYour Favorite Movie Platform`;
+
+            await sendEmail(user.email, subject, text);
+
+            reminder.notificationSent = true;
+            await reminder.save();
+        }
+
+        res.status(200).json({ message: "Reminder emails sent successfully to the user." });
+    } catch (error) {
+        res.status(500).json({ message: "Failed to send reminder emails: " + error.message });
+    }
+};
+
+// Send reminder emails to all users
+exports.sendReminderEmailsToAllUsers = async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;
+
+    try {
+        const today = new Date();
+        const nextMonth = new Date(today);
+        nextMonth.setMonth(nextMonth.getMonth() + 1);
 
         const reminders = await Reminder.find({
             $or: [
-                { movie: { $exists: true }, 'movie.releaseDate': { $gte: today, $lte: tomorrow } },
-                { trailer: { $exists: true }, 'trailer.releaseDate': { $gte: today, $lte: tomorrow } }
+                { movie: { $exists: true }, 'movie.releaseDate': { $gte: today, $lte: nextMonth } },
+                { trailer: { $exists: true }, 'trailer.releaseDate': { $gte: today, $lte: nextMonth } }
             ]
         })
-        .populate('user', 'email')
+        .populate('user', 'email username')
         .populate('movie', 'title releaseDate')
         .populate('trailer', 'title releaseDate')
         .skip((page - 1) * limit)
@@ -38,25 +90,16 @@ exports.sendReminderEmails = async (req, res) => {
         for (const reminder of reminders) {
             const content = reminder.movie || reminder.trailer;
             const subject = `Reminder: Upcoming Release - ${content.title}`;
-            const text = `Hi there,\n\nDon't forget to check out "${content.title}" releasing on ${content.releaseDate.toDateString()}.\n\nBest regards,\nYour Favorite Movie Platform`;
+            const text = `Hi ${reminder.user.username},\n\nDon't forget to check out "${content.title}" releasing on ${content.releaseDate.toDateString()}.\n\nBest regards,\nYour Favorite Movie Platform`;
 
-            // Send email notification
-            const mailOptions = {
-                from: process.env.EMAIL_USERNAME,
-                to: reminder.user.email,
-                subject: subject,
-                text: text
-            };
+            await sendEmail(reminder.user.email, subject, text);
 
-            await transporter.sendMail(mailOptions);
-
-            // Optionally update reminder to indicate notification was sent (if needed)
             reminder.notificationSent = true;
             await reminder.save();
         }
 
         res.status(200).json({
-            message: "Reminder emails sent successfully.",
+            message: "Reminder emails sent successfully to all users.",
             currentPage: Number(page),
             totalItems: reminders.length,
             totalPages: Math.ceil(reminders.length / limit)
