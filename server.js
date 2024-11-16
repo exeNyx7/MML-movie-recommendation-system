@@ -21,6 +21,12 @@ const listRoutes = require('./routes/listRoutes');
 const reminderRoutes = require('./routes/reminderRoutes'); 
 const trailerRoutes = require('./routes/trailerRoutes');
 // const communityRoutes = require('./routes/communityRoutes');
+const newsRoutes = require('./routes/newsRoutes');
+const actorRoutes = require('./routes/actorRoutes');
+const directorRoutes = require('./routes/directorRoutes');
+const awardRoutes = require('./routes/awardRoutes');
+const boxOfficeRoutes = require('./routes/boxOfficeRoutes');
+
 
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
@@ -29,6 +35,12 @@ app.use('/api/lists', listRoutes);
 app.use('/api/reminders', reminderRoutes); 
 app.use('/api/trailers', trailerRoutes);
 // app.use('/api/community', communityRoutes);
+app.use('/api/news', newsRoutes);
+app.use('/api/actors', actorRoutes);
+app.use('/api/directors', directorRoutes);
+app.use('/api/awards', awardRoutes);
+app.use('/api/box-office', boxOfficeRoutes);
+
 
 // Basic route for home
 app.get('/', (req, res) => {

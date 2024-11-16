@@ -17,7 +17,7 @@ const notificationController = require('../controllers/notificationController');
 
 router.post('/movies/:movieId/set-reminder', authenticate, setMovieReminder); // Set reminder for a specific movie
 router.post('/trailers/:trailerId/set-reminder', authenticate, setTrailerReminder); // Set reminder for a specific trailer
-router.post('/set-reminder', authenticate, setReminder); // New route for setting reminders
+// router.post('/set-reminder', authenticate, setReminder); // New route for setting reminders
 
 router.get('/users/:userId/movies-reminders', authenticate, getMoviesWithRemindersByUserId); // Get all movies with reminders by user ID
 router.get('/users/:userId/trailers-reminders', authenticate, getTrailersWithRemindersByUserId); // Get all trailers with reminders by user ID

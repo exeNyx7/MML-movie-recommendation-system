@@ -41,6 +41,12 @@ averageRating: {
     viewCount: { type: Number, default: 0 }, // Tracks how often the movie is viewed
 
     aired: { type: Boolean, default: false, required: true },
+    associatedNews: [{ type: Schema.Types.ObjectId, ref: 'News' }],
+
+    directors: [{ type: Schema.Types.ObjectId, ref: 'Director' }],
+    actors: [{ type: Schema.Types.ObjectId, ref: 'Actor' }],
+    boxOffice: { type: Schema.Types.ObjectId, ref: 'BoxOffice' },
+    awards: [{ type: Schema.Types.ObjectId, ref: 'Award' }],
 
     createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
