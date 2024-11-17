@@ -7,9 +7,22 @@ const userSchema = new Schema({
     password: { type: String, required: true },
     role: { type: String, required: true, default: 'user' }, // 'admin' or 'user'
     preferences: {
-        genres: [String],
-        actors: [String]
+        genres: [String], // List of favorite genres
+        actors: [String], // List of favorite actors
+        directors: [String] // List of favorite directors
     },
+    activity: {
+        recentlyRatedMovies: [{ type: Schema.Types.ObjectId, ref: 'Movie' }], // Recently rated movies
+        watchHistory: [{ type: Schema.Types.ObjectId, ref: 'Movie' }], // Watch history
+        logs: [
+            {
+                action: { type: String }, // e.g., "viewed", "rated", "searched"
+                target: { type: Schema.Types.ObjectId, ref: 'Movie' }, // Target movie or object
+                timestamp: { type: Date, default: Date.now }
+            }
+        ]
+}
+,
     token: { type: String }
 }, { timestamps: true });
 

@@ -11,18 +11,18 @@ const movieSchema = new Schema({
     synopsis: { type: String },
     
     // Ensure average rating is between 1 and 5
-averageRating: {
-    type: mongoose.SchemaTypes.Decimal128,
-    min: 1.0,
-    max: 5.0,
-    default: 1.0,
-    validate: {
-        validator: function(v) {
-            return v.toString().match(/^\d+(\.\d{1})?$/); // Ensures one digit after the decimal
-        },
-        message: props => `${props.value} is not a valid rating number!`
-    }
-},
+    averageRating: {
+        type: mongoose.SchemaTypes.Decimal128,
+        min: 1.0,
+        max: 5.0,
+        default: 1.0,
+        validate: {
+            validator: function(v) {
+                return v.toString().match(/^\d+(\.\d{1})?$/); // Ensures one digit after the decimal
+            },
+            message: props => `${props.value} is not a valid rating number!`
+        }
+    },
 
     
     movieCover: { type: String },
@@ -37,7 +37,7 @@ averageRating: {
     language: { type: String }, 
     keywords: [{ type: String }], 
 
-    popularity: { type: Number, default: 0 }, // Can be incremented based on user interactions
+    popularity: { type: Number, default: 0 }, // Incremented based on user interactions
     viewCount: { type: Number, default: 0 }, // Tracks how often the movie is viewed
 
     aired: { type: Boolean, default: false, required: true },
