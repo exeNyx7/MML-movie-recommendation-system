@@ -21,6 +21,14 @@ const sendEmail = async (userEmail, subject, text) => {
         subject: subject,
         text: text
     };
+    console.log(mailOptions);
+    console.log(userEmail);
+    console.log(subject);
+    console.log(text);
+    console.log(process.env.EMAIL_USERNAME);
+    console.log(process.env.EMAIL_PASSWORD);
+
+
 
     await transporter.sendMail(mailOptions);
 };
@@ -34,11 +42,11 @@ exports.sendReminderEmailsToUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ message: "User not found" });
         }
-
+        
         const today = new Date();
         const nextMonth = new Date(today);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-
+        
         const reminders = await Reminder.find({
             user: userId,
             $or: [
@@ -48,18 +56,20 @@ exports.sendReminderEmailsToUser = async (req, res) => {
         })
         .populate('movie', 'title releaseDate')
         .populate('trailer', 'title releaseDate');
-
+        
+        // THIS FOR IS NOT WORKING
         for (const reminder of reminders) {
             const content = reminder.movie || reminder.trailer;
             const subject = `Reminder: Upcoming Release - ${content.title}`;
             const text = `Hi ${user.username},\n\nDon't forget to check out "${content.title}" releasing on ${content.releaseDate.toDateString()}.\n\nBest regards,\nYour Favorite Movie Platform`;
-
+            
+            console.log(userId);
             await sendEmail(user.email, subject, text);
-
+            
             reminder.notificationSent = true;
             await reminder.save();
         }
-
+        
         res.status(200).json({ message: "Reminder emails sent successfully to the user." });
     } catch (error) {
         res.status(500).json({ message: "Failed to send reminder emails: " + error.message });
