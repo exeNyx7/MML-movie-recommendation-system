@@ -1,7 +1,7 @@
 const Movie = require('../models/Movie');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
-const nodemailer = require('nodemailer');
+const { sendEmail, sendTemplatedEmail } = require('../helpers/emailService');
 require('dotenv').config();
 
 
@@ -9,7 +9,7 @@ require('dotenv').config();
 /*
 notificationController.js should focus on sending notifications related to new and upcoming content. This includes notifying users about new releases in their favorite genres or upcoming trailers.
 reminderController.js handles reminders set by users for specific movies or trailers, sending emails when these specific movies or trailers are about to be released.
-*/ 
+*/
 
 
 // Function to send notifications for upcoming content
@@ -17,14 +17,6 @@ exports.sendUpcomingContentNotifications = async (req, res) => {
     const { page = 1, limit = 10 } = req.query;
 
     try {
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: process.env.EMAIL_USERNAME,
-                pass: process.env.EMAIL_PASSWORD
-            }
-        });
-
         // Fetch paginated users based on preferences
         const users = await User.find({})
             .skip((page - 1) * limit)
@@ -46,15 +38,15 @@ exports.sendUpcomingContentNotifications = async (req, res) => {
                 });
 
                 if (!existingNotification) {
-                    // Send email notification
-                    const mailOptions = {
-                        from: process.env.EMAIL_USERNAME,
-                        to: user.email,
-                        subject: 'Upcoming Movie Release',
-                        text: `Hi ${user.username},\n\nDon't miss out on the upcoming release: ${movie.title}! It’s set to release on ${movie.releaseDate.toDateString()}.\n\nBest regards,\nMovie Recommendation System`
-                    };
-
-                    await transporter.sendMail(mailOptions);
+                    // Send email notification using template
+                    const sent = await sendTemplatedEmail(user.email, 'notification', {
+                        username: user.username,
+                        movieTitle: movie.title,
+                        releaseDate: movie.releaseDate.toDateString()
+                    });
+                    if (!sent) {
+                        console.error(`Failed to send notification email to ${user.email}`);
+                    }
 
                     // Record notification in the Notification model
                     await Notification.create({

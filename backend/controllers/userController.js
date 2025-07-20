@@ -3,9 +3,10 @@ const Wishlist = require('../models/Wishlist');
 
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { 
-    generateToken 
+const {
+    generateToken
 } = require('../config/auth');
+const { sendTemplatedEmail } = require('../helpers/emailService');
 
 
 const registerUser = async (req, res) => {
@@ -35,9 +36,12 @@ const registerUser = async (req, res) => {
             role: 'user' // default role
         });
 
+        // Send welcome email using template
+        sendTemplatedEmail(user.email, 'welcome', { username: user.username });
+
         // return new user
         res.status(201).json(user);
-    } 
+    }
     catch (err) {
         console.log(err);
         res.status(500).send("Something went wrong");
@@ -59,19 +63,19 @@ const loginUser = async (req, res) => {
         if (user && (await bcrypt.compare(password, user.password))) {
             // Create token
             const token = generateToken(user);
-            
+
             // const token = jwt.sign(
-                // { 
-                    //     user_id: user._id, 
-                    //     email, 
-                    //     role: user.role 
-                    // },
-                    //     process.env.JWT_SECRET,
-                    // { 
-                        //     expiresIn: "2h" 
-                        // });
-                        
-                        
+            // { 
+            //     user_id: user._id, 
+            //     email, 
+            //     role: user.role 
+            // },
+            //     process.env.JWT_SECRET,
+            // { 
+            //     expiresIn: "2h" 
+            // });
+
+
             // save user token
             user.token = token;
             res.status(200).json({ message: "Logged in successfully", email, token });
@@ -114,7 +118,7 @@ const registerAdmin = async (req, res) => {
 
         // return new admin
         res.status(201).json(user);
-    } 
+    }
     catch (err) {
         console.log(err);
         res.status(500).send("Something went wrong");
@@ -187,6 +191,8 @@ const updateUser = async (req, res) => {
         if (!user) {
             return res.status(404).send("User not found");
         }
+        // Send profile update email using template
+        sendTemplatedEmail(user.email, 'profileUpdate', { username: user.username });
         res.status(200).json(user);
     } catch (err) {
         console.log(err);
@@ -206,7 +212,8 @@ const deleteUser = async (req, res) => {
         if (!user) {
             return res.status(404).send("User not found");
         }
-
+        // Send account deletion email using template
+        sendTemplatedEmail(user.email, 'accountDeletion', { username: user.username });
         res.status(200).send("User deleted successfully");
     } catch (err) {
         console.log(err);

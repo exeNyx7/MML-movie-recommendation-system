@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const { 
-    addMovie, 
-    updateMovie, 
-    deleteMovie, 
-    getAllMovies, 
-    getMovie, 
+const {
+    addMovie,
+    updateMovie,
+    deleteMovie,
+    getAllMovies,
+    getMovie,
     searchMovieByName,
     searchAndFilterMovies,
     getTopMoviesOfMonth,
@@ -25,7 +25,7 @@ router.get('/search', searchMovieByName); // Route to handle searching by name
 router.get('/filter', searchAndFilterMovies); // route for search and filter
 
 router.get('/top/month', getTopMoviesOfMonth);
-router.get('/top/genre', getTopMoviesByGenre); 
+router.get('/top/genre', getTopMoviesByGenre);
 router.get('/upcoming', getUpcomingMovies);
 
 router.get('/:id', getMovie);
