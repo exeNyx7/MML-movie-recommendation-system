@@ -1,7 +1,11 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { useMutation, useQueryClient, useQuery } from 'react-query';
 import styled from 'styled-components';
-import { FaStar, FaEye, FaCalendar, FaClock, FaGlobe } from 'react-icons/fa';
+import { FaStar, FaEye, FaCalendar, FaClock, FaGlobe, FaHeart, FaRegHeart } from 'react-icons/fa';
+import { wishlistService } from '../../api/wishlistService';
+import { useAuth } from '../../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const Card = styled.div`
   background: white;
@@ -67,6 +71,33 @@ const RatingBadge = styled.div`
   display: flex;
   align-items: center;
   gap: 0.25rem;
+`;
+
+const WishlistButton = styled.button`
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: none;
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: ${props => props.isInWishlist ? '#e53e3e' : '#94a3b8'};
+
+  &:hover {
+    transform: scale(1.1);
+    background: white;
+    color: ${props => props.isInWishlist ? '#e53e3e' : '#667eea'};
+  }
+
+  svg {
+    font-size: 1rem;
+  }
 `;
 
 const CardContent = styled.div`
@@ -153,6 +184,10 @@ const ViewButton = styled(Link)`
 `;
 
 const MovieCard = ({ movie }) => {
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isInWishlist, setIsInWishlist] = useState(false);
+
   const {
     _id,
     title,
@@ -164,10 +199,70 @@ const MovieCard = ({ movie }) => {
     averageRating = 0,
     movieCover,
     countryOfOrigin,
-    language,
     popularity = 0,
     viewCount = 0
   } = movie;
+
+  // Check if movie is in wishlist when component mounts
+  const { data: wishlistStatus } = useQuery(
+    ['wishlistStatus', _id],
+    () => wishlistService.checkWishlistStatus(_id),
+    {
+      enabled: !!user && !!_id,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      onSuccess: (data) => {
+        setIsInWishlist(data.isInWishlist);
+      }
+    }
+  );
+
+  // Add to wishlist mutation
+  const addToWishlistMutation = useMutation(
+    () => wishlistService.addToWishlist(_id),
+    {
+      onSuccess: () => {
+        setIsInWishlist(true);
+        toast.success('Added to wishlist!');
+        queryClient.invalidateQueries(['wishlist']);
+        queryClient.invalidateQueries(['wishlistStatus', _id]);
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to add to wishlist');
+      }
+    }
+  );
+
+  // Remove from wishlist mutation
+  const removeFromWishlistMutation = useMutation(
+    () => wishlistService.removeFromWishlist(_id),
+    {
+      onSuccess: () => {
+        setIsInWishlist(false);
+        toast.success('Removed from wishlist!');
+        queryClient.invalidateQueries(['wishlist']);
+        queryClient.invalidateQueries(['wishlistStatus', _id]);
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to remove from wishlist');
+      }
+    }
+  );
+
+  const handleWishlistToggle = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (!user) {
+      toast.error('Please login to manage your wishlist');
+      return;
+    }
+
+    if (isInWishlist) {
+      removeFromWishlistMutation.mutate();
+    } else {
+      addToWishlistMutation.mutate();
+    }
+  };
 
   // Helper function to safely format rating
   const formatRating = (rating) => {
@@ -217,6 +312,13 @@ const MovieCard = ({ movie }) => {
           <FaStar />
           {formatRating(averageRating)}
         </RatingBadge>
+        <WishlistButton
+          isInWishlist={isInWishlist}
+          onClick={handleWishlistToggle}
+          disabled={addToWishlistMutation.isLoading || removeFromWishlistMutation.isLoading}
+        >
+          {isInWishlist ? <FaHeart /> : <FaRegHeart />}
+        </WishlistButton>
         <MovieTitle>{title}</MovieTitle>
       </MovieImage>
 

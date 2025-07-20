@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useQuery } from 'react-query';
 import styled from 'styled-components';
-import { FaSearch, FaFilter, FaStar, FaEye, FaCalendar, FaGlobe } from 'react-icons/fa';
+import { FaSearch, FaFilter, FaStar, FaEye, FaCalendar } from 'react-icons/fa';
 import { movieService } from '../api/movieService';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 import MovieCard from '../components/movies/MovieCard';
@@ -129,6 +129,42 @@ const FilterGroup = styled.div`
   }
 `;
 
+const FilterActions = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e2e8f0;
+`;
+
+const ActionButton = styled.button`
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 0.375rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &.apply {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+
+  &.clear {
+    background: #f1f5f9;
+    color: #475569;
+
+    &:hover {
+      background: #e2e8f0;
+    }
+  }
+`;
+
 const MoviesGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -194,13 +230,17 @@ const Movies = () => {
         sortBy: ''
     });
     const [showFilters, setShowFilters] = useState(false);
+    const [appliedFilters, setAppliedFilters] = useState({});
 
     // Fetch all movies
     const { data: movies, isLoading, error } = useQuery(
-        ['movies', searchQuery, filters],
+        ['movies', searchQuery, appliedFilters],
         () => {
             if (searchQuery) {
                 return movieService.searchMovies(searchQuery);
+            }
+            if (Object.keys(appliedFilters).length > 0) {
+                return movieService.searchAndFilterMovies(appliedFilters);
             }
             return movieService.getMovies();
         },
@@ -266,6 +306,18 @@ const Movies = () => {
         setShowFilters(!showFilters);
     };
 
+    const applyFilters = () => {
+        const filterParams = {};
+
+        if (filters.genre) filterParams.genre = filters.genre;
+        if (filters.minRating) filterParams.minRating = filters.minRating;
+        if (filters.maxRating) filterParams.maxRating = filters.maxRating;
+        if (filters.sortBy) filterParams.sortBy = filters.sortBy;
+
+        setAppliedFilters(filterParams);
+        setShowFilters(false);
+    };
+
     const clearFilters = () => {
         setFilters({
             genre: '',
@@ -273,7 +325,9 @@ const Movies = () => {
             maxRating: '',
             sortBy: ''
         });
+        setAppliedFilters({});
         setSearchQuery('');
+        setShowFilters(false);
     };
 
     if (isLoading) {
@@ -378,6 +432,15 @@ const Movies = () => {
                                 <option value="title">Title (A-Z)</option>
                             </select>
                         </FilterGroup>
+
+                        <FilterActions>
+                            <ActionButton className="apply" onClick={applyFilters}>
+                                Apply Filters
+                            </ActionButton>
+                            <ActionButton className="clear" onClick={clearFilters}>
+                                Clear All
+                            </ActionButton>
+                        </FilterActions>
                     </FilterPanel>
                 </SearchAndFilterSection>
 

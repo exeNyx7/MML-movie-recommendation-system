@@ -1,10 +1,13 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { useQuery } from 'react-query';
+import { useQuery, useMutation, useQueryClient } from 'react-query';
 import styled from 'styled-components';
-import { FaStar, FaCalendar, FaClock, FaGlobe, FaUser, FaArrowLeft, FaHeart } from 'react-icons/fa';
+import { FaStar, FaCalendar, FaClock, FaGlobe, FaUser, FaArrowLeft, FaHeart, FaRegHeart } from 'react-icons/fa';
 import { movieService } from '../api/movieService';
+import { wishlistService } from '../api/wishlistService';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
+import toast from 'react-hot-toast';
 
 const MovieDetailContainer = styled.div`
   min-height: calc(100vh - 80px);
@@ -214,6 +217,10 @@ const ActionButton = styled.button`
       transform: translateY(-2px);
       box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
     }
+
+    &.wishlist {
+      background: ${props => props.isInWishlist ? '#e53e3e' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'};
+    }
   }
 
   &.secondary {
@@ -223,6 +230,11 @@ const ActionButton = styled.button`
     &:hover {
       background: #e2e8f0;
     }
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
@@ -248,6 +260,9 @@ const EmptyState = styled.div`
 
 const MovieDetail = () => {
   const { id } = useParams();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const [isInWishlist, setIsInWishlist] = useState(false);
 
   const { data: movie, isLoading, error } = useQuery(
     ['movie', id],
@@ -257,6 +272,64 @@ const MovieDetail = () => {
       staleTime: 5 * 60 * 1000, // 5 minutes
     }
   );
+
+  // Check if movie is in wishlist when component mounts
+  const { data: wishlistStatus } = useQuery(
+    ['wishlistStatus', id],
+    () => wishlistService.checkWishlistStatus(id),
+    {
+      enabled: !!user && !!id,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      onSuccess: (data) => {
+        setIsInWishlist(data.isInWishlist);
+      }
+    }
+  );
+
+  // Add to wishlist mutation
+  const addToWishlistMutation = useMutation(
+    () => wishlistService.addToWishlist(id),
+    {
+      onSuccess: () => {
+        setIsInWishlist(true);
+        toast.success('Added to wishlist!');
+        queryClient.invalidateQueries(['wishlist']);
+        queryClient.invalidateQueries(['wishlistStatus', id]);
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to add to wishlist');
+      }
+    }
+  );
+
+  // Remove from wishlist mutation
+  const removeFromWishlistMutation = useMutation(
+    () => wishlistService.removeFromWishlist(id),
+    {
+      onSuccess: () => {
+        setIsInWishlist(false);
+        toast.success('Removed from wishlist!');
+        queryClient.invalidateQueries(['wishlist']);
+        queryClient.invalidateQueries(['wishlistStatus', id]);
+      },
+      onError: (error) => {
+        toast.error(error.response?.data?.message || 'Failed to remove from wishlist');
+      }
+    }
+  );
+
+  const handleWishlistToggle = () => {
+    if (!user) {
+      toast.error('Please login to manage your wishlist');
+      return;
+    }
+
+    if (isInWishlist) {
+      removeFromWishlistMutation.mutate();
+    } else {
+      addToWishlistMutation.mutate();
+    }
+  };
 
   // Helper function to safely format rating
   const formatRating = (rating) => {
@@ -426,9 +499,14 @@ const MovieDetail = () => {
                 )}
 
                 <ActionButtons>
-                  <ActionButton className="primary">
-                    <FaHeart />
-                    Add to Wishlist
+                  <ActionButton
+                    className={`primary wishlist ${isInWishlist ? 'in-wishlist' : ''}`}
+                    onClick={handleWishlistToggle}
+                    isInWishlist={isInWishlist}
+                    disabled={addToWishlistMutation.isLoading || removeFromWishlistMutation.isLoading}
+                  >
+                    {isInWishlist ? <FaHeart /> : <FaRegHeart />}
+                    {isInWishlist ? 'Remove from Wishlist' : 'Add to Wishlist'}
                   </ActionButton>
                   <ActionButton className="secondary">
                     <FaStar />

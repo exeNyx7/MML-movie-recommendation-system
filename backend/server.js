@@ -35,6 +35,7 @@ const awardRoutes = require('./routes/awardRoutes');
 const boxOfficeRoutes = require('./routes/boxOfficeRoutes');
 const recommendationRoutes = require('./routes/recommendationRoutes');
 const adminDashboardRoutes = require('./routes/adminDashboardRoutes');
+const wishlistRoutes = require('./routes/wishlistRoutes');
 
 app.use('/api/users', userRoutes);
 app.use('/api/movies', movieRoutes);
@@ -50,6 +51,7 @@ app.use('/api/awards', awardRoutes);
 app.use('/api/box-office', boxOfficeRoutes);
 app.use('/api/recommendations', recommendationRoutes);
 app.use('/api/admin', adminDashboardRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 // Basic route for home
 app.get('/', (req, res) => {
