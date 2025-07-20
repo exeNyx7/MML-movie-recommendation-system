@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
-import { FaFilm, FaEye, FaEyeSlash, FaUser, FaLock } from 'react-icons/fa';
+import { FaFilm, FaEye, FaEyeSlash, FaUser, FaLock, FaEnvelope } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from '../components/common/LoadingSpinner';
 
-const LoginContainer = styled.div`
+const RegisterContainer = styled.div`
   min-height: calc(100vh - 80px);
   display: flex;
   align-items: center;
@@ -14,7 +14,7 @@ const LoginContainer = styled.div`
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 `;
 
-const LoginCard = styled.div`
+const RegisterCard = styled.div`
   background: white;
   border-radius: 1rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -108,7 +108,7 @@ const PasswordToggle = styled.button`
   }
 `;
 
-const LoginButton = styled.button`
+const RegisterButton = styled.button`
   width: 100%;
   padding: 1rem;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -135,45 +135,7 @@ const LoginButton = styled.button`
   }
 `;
 
-const Divider = styled.div`
-  display: flex;
-  align-items: center;
-  margin: 2rem 0;
-  color: #94a3b8;
-  font-size: 0.875rem;
-
-  &::before,
-  &::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-  }
-
-  span {
-    padding: 0 1rem;
-  }
-`;
-
-const AdminLoginButton = styled.button`
-  width: 100%;
-  padding: 0.75rem;
-  background: transparent;
-  color: #667eea;
-  border: 2px solid #667eea;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
-
-  &:hover {
-    background: #667eea;
-    color: white;
-  }
-`;
-
-const RegisterLink = styled.div`
+const LoginLink = styled.div`
   margin-top: 2rem;
   color: #64748b;
   font-size: 0.875rem;
@@ -199,17 +161,19 @@ const ErrorMessage = styled.div`
   border: 1px solid #fecaca;
 `;
 
-const Login = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
+    username: '',
     email: '',
-    password: ''
+    password: '',
+    confirmPassword: ''
   });
   const [showPassword, setShowPassword] = useState(false);
-  const [isAdminLogin, setIsAdminLogin] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { login, loginAdmin } = useAuth();
+  const { register } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -217,55 +181,52 @@ const Login = () => {
       ...formData,
       [e.target.name]: e.target.value
     });
-    setError(''); // Clear error when user types
+    setError('');
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (formData.password !== formData.confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      const result = isAdminLogin
-        ? await loginAdmin(formData)
-        : await login(formData);
+      const result = await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password
+      });
 
       if (result.success) {
-        navigate('/');
+        navigate('/login');
       }
     } catch (error) {
-      setError('Login failed. Please check your credentials.');
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
-  const toggleAdminLogin = () => {
-    setIsAdminLogin(!isAdminLogin);
-    setError('');
-  };
-
   return (
-    <LoginContainer>
-      <LoginCard>
+    <RegisterContainer>
+      <RegisterCard>
         <Logo>
           <FaFilm />
           MML
         </Logo>
 
-        <Title>
-          {isAdminLogin ? 'Admin Login' : 'Welcome Back'}
-        </Title>
-        <Subtitle>
-          {isAdminLogin
-            ? 'Sign in to access admin dashboard'
-            : 'Sign in to your My Movie List account'
-          }
-        </Subtitle>
+        <Title>Create Account</Title>
+        <Subtitle>Join My Movie List and start discovering amazing films</Subtitle>
 
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
@@ -273,6 +234,20 @@ const Login = () => {
           <FormGroup>
             <InputIcon>
               <FaUser />
+            </InputIcon>
+            <Input
+              type="text"
+              name="username"
+              placeholder="Username"
+              value={formData.username}
+              onChange={handleChange}
+              required
+            />
+          </FormGroup>
+
+          <FormGroup>
+            <InputIcon>
+              <FaEnvelope />
             </InputIcon>
             <Input
               type="email"
@@ -298,44 +273,53 @@ const Login = () => {
             />
             <PasswordToggle
               type="button"
-              onClick={togglePasswordVisibility}
-              aria-label={showPassword ? 'Hide password' : 'Show password'}
+              onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <FaEyeSlash /> : <FaEye />}
             </PasswordToggle>
           </FormGroup>
 
-          <LoginButton type="submit" disabled={loading}>
+          <FormGroup>
+            <InputIcon>
+              <FaLock />
+            </InputIcon>
+            <Input
+              type={showConfirmPassword ? 'text' : 'password'}
+              name="confirmPassword"
+              placeholder="Confirm password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+            />
+            <PasswordToggle
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </PasswordToggle>
+          </FormGroup>
+
+          <RegisterButton type="submit" disabled={loading}>
             {loading ? (
               <>
                 <LoadingSpinner size="16px" text="" />
-                Signing in...
+                Creating Account...
               </>
             ) : (
               <>
-                <FaLock />
-                {isAdminLogin ? 'Admin Sign In' : 'Sign In'}
+                <FaUser />
+                Create Account
               </>
             )}
-          </LoginButton>
+          </RegisterButton>
         </Form>
 
-        <Divider>
-          <span>or</span>
-        </Divider>
-
-        <AdminLoginButton type="button" onClick={toggleAdminLogin}>
-          {isAdminLogin ? 'Switch to User Login' : 'Admin Login'}
-        </AdminLoginButton>
-
-        {!isAdminLogin && (
-          <RegisterLink>
-            Don't have an account? <Link to="/register">Sign up</Link>
-          </RegisterLink>
-        )}
-      </LoginCard>
-    </LoginContainer>
+        <LoginLink>
+          Already have an account? <Link to="/login">Sign in</Link>
+        </LoginLink>
+      </RegisterCard>
+    </RegisterContainer>
   );
 };
 
-export default Login; 
+export default Register; 

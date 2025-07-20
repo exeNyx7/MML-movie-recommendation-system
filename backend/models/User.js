@@ -21,9 +21,18 @@ const userSchema = new Schema({
                 timestamp: { type: Date, default: Date.now }
             }
         ]
-}
-,
+    },
     token: { type: String }
 }, { timestamps: true });
+
+// Optimized indexes for better query performance
+userSchema.index({ email: 1 }); // For login queries
+userSchema.index({ username: 1 }); // For username lookups
+userSchema.index({ role: 1 }); // For admin queries
+userSchema.index({ 'preferences.genres': 1 }); // For genre-based recommendations
+userSchema.index({ 'preferences.actors': 1 }); // For actor-based recommendations
+userSchema.index({ 'preferences.directors': 1 }); // For director-based recommendations
+userSchema.index({ createdAt: -1 }); // For sorting by registration date
+userSchema.index({ 'activity.logs.timestamp': -1 }); // For activity tracking
 
 module.exports = mongoose.model('User', userSchema);
